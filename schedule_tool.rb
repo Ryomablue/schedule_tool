@@ -36,21 +36,23 @@ $meetingCollection =  {name: "Meeting 1", duration: 3, type: 'onsite'},
           {name: "Meeting 2", duration: 0.5, type: 'onsite'}
 
 class Tool
-  #iterate through the meetingCollection of meetingCollection
-   $meetingCollection.each do |key,value|
-    if key[:type] == 'offsite'
-      duration = key[:duration] + 0.5
-    else
-      duration = key[:duration]
+
+    #iterate through the meetingCollection of meetingCollection
+    $meetingCollection.each do |key,value|
+      case key[:type]
+      when 'offsite'
+        duration = key[:duration] + 0.5
+      else
+        duration = key[:duration]
+      end
+      #subtract hoursInDay from total in day
+      remainingHoursInDay = $hoursInDay - duration
+      $hoursInDay = remainingHoursInDay
     end
-    #subtract hoursInDay from total in day
-    remainingHoursInDay = $hoursInDay - duration
-    $hoursInDay = remainingHoursInDay
-  end
 
-
-  # simple if/else for if meetings can fit in day
-  if $hoursInDay >= 0
+  # Let user know that meetingCollection fit in day
+  case $hoursInDay
+  when 0..8
     puts 'Yes, can fit'
   else
     puts 'No, can’t fit'
