@@ -1,61 +1,54 @@
-# Create new feature that arranges meetings in 8 hour day
-# If meetings cannot fit, let user know "No, can't fit"
-# 2 kinds of meetings: onsite/offsite
+# Create new feature that arranges meetingCollection in 8 hour day
+# If meetingCollection cannot fit, let user know "No, can't fit"
+# 2 kinds of meetingCollection: onsite/offsite
 # onsite: can be back to back w/o gaps
 # offsite: 	-30 min buffer on either end (travel time)
-# 			    -can overlap off-site meetings
+# 			    -can overlap off-site meetingCollection
 # 			    -can extends past Start/End of Day
 
-#INPUT example 1:
-# {
-	# {name: "Meeting 1", duration: 3, type: :onsite},
-	# {name: "Meeting 2", duration: 2, type: :offsite},
-	# {name: "Meeting 3", duration: 1, type: :offsite},
-	# {name: "Meeting 4", duration: 0.5, type: :onsite}
-# }
 
-# OUTPUT example 1:
-# 	9:00-12:00 - Meeting 1
-# 	12:00-12:30 - Meeting 4
-# 	1:00-3:00 - Meeting 2
-# 	3:30-4:30 -Meeting 3
+require 'time'
 
-# INPUT example 2:
-# {
-# 	{ name: “Meeting 1”, duration: 4, type: :offsite },
-# 	{ name: “Meeting 2”, duration: 4, type: :offsite }
-# }
+class Meeting
+  attr_accessor :name, :duration, :type
+  def initialize(name, duration, type)
+    @name = name
+    @duration = duration
+    @type = type
+  end
+end
 
-# OUTPUT example 2:
-# No, can’t fit.
+class Scheduler
+    def schedulable_time
+      {starts_at: Time.parse("9:00"), ends_at: Time.parse("17:00")}
+    end
+end
 
 $hoursInDay = 8
-$meetingCollection =  {name: "Meeting 1", duration: 3, type: 'onsite'}, 
-          {name: "Meeting 2", duration: 2, type: 'offsite'}, 
-          {name: "Meeting 2", duration: 1, type: 'offsite'},
-          {name: "Meeting 2", duration: 0.5, type: 'onsite'}
+$meeting_hash = {
+  :m1 => Meeting.new("Meeting 1", 1.5, :onsite),
+  :m2 => Meeting.new('Meeting 2', 2, :offsite),
+  :m3 => Meeting.new('Meeting 3', 1, :onsite),
+  :m4 => Meeting.new('Meeting 4', 1, :offsite),
+  :m5 => Meeting.new('Meeting 5', 1, :offsite)
+}
 
-class Tool
-
-    #iterate through the meetingCollection of meetingCollection
-    $meetingCollection.each do |key,value|
-      case key[:type]
-      when 'offsite'
-        duration = key[:duration] + 0.5
-      else
-        duration = key[:duration]
-      end
-      #subtract hoursInDay from total in day
-      remainingHoursInDay = $hoursInDay - duration
-      $hoursInDay = remainingHoursInDay
+#iterate through the meetingCollection of meetingCollection
+  $meeting_hash.each do |key,value|
+    case value.type
+    when :offsite
+      duration = value.duration + 0.5
+    else
+      duration = value.duration
     end
+    remainingHoursInDay = $hoursInDay - duration
+    $hoursInDay = remainingHoursInDay
+  end
 
-  # Let user know that meetingCollection fit in day
+# Let user know that meetingCollection fit in day
   case $hoursInDay
   when 0..8
     puts 'Yes, can fit'
   else
     puts 'No, can’t fit'
   end
-
-end
