@@ -8,24 +8,13 @@
 
 
 require 'time'
+require_relative'Meeting'
+require_relative 'Scheduler'
 
-class Meeting
-  attr_accessor :name, :duration, :type
-  def initialize(name, duration, type)
-    @name = name
-    @duration = duration
-    @type = type
-  end
-end
+t = Scheduler.new
+$hoursInDay = t.time_difference
 
-class Scheduler
-    def schedulable_time
-      {starts_at: Time.parse("9:00"), ends_at: Time.parse("17:00")}
-    end
-end
-
-$hoursInDay = 8
-$meeting_hash = {
+$meetings = {
   :m1 => Meeting.new("Meeting 1", 1.5, :onsite),
   :m2 => Meeting.new('Meeting 2', 2, :offsite),
   :m3 => Meeting.new('Meeting 3', 1, :onsite),
@@ -34,7 +23,7 @@ $meeting_hash = {
 }
 
 #iterate through the meetingCollection of meetingCollection
-  $meeting_hash.each do |key,value|
+  $meetings.each do |key,value|
     case value.type
     when :offsite
       duration = value.duration + 0.5
@@ -49,6 +38,9 @@ $meeting_hash = {
   case $hoursInDay
   when 0..8
     puts 'Yes, can fit'
+    $meetings.each do |key, value|
+    	puts "timeslot - #{value.name}"
+    end
   else
     puts 'No, can’t fit'
   end
