@@ -8,8 +8,9 @@
 
 
 require 'time'
-require_relative'Meeting'
+require_relative 'Meeting'
 require_relative 'Scheduler'
+require_relative 'Time_slots'
 
 t = Scheduler.new
 $hoursInDay = t.time_difference
@@ -22,7 +23,15 @@ $meetings = {
   :m5 => Meeting.new('Meeting 5', 1, :offsite)
 }
 
-#iterate through the meetingCollection of meetingCollection
+$timeslots = {
+  :t1 => Time_slots.new("9:00", "10:30"),
+  :t2 => Time_slots.new("10:30", "11:30"),
+  :t3 => Time_slots.new("12:00", "1:00"),
+  :t4 => Time_slots.new("1:30", "2:30"),
+  :t5 => Time_slots.new("3:00", "5:00")
+}
+
+def can_fit_all_meetings?
   $meetings.each do |key,value|
     case value.type
     when :offsite
@@ -34,13 +43,25 @@ $meetings = {
     $hoursInDay = remainingHoursInDay
   end
 
+  return $hoursInDay
+end
+
+def set_timeslots
+
+end
+
+def sort_meetings
+  $meetings.each do |key, value|
+    puts "timeslots - #{value.name}"
+  end
+end
+
+
 # Let user know that meetingCollection fit in day
-  case $hoursInDay
+  case can_fit_all_meetings?
   when 0..8
-    puts 'Yes, can fit'
-    $meetings.each do |key, value|
-    	puts "timeslot - #{value.name}"
-    end
+    set_timeslots
+    sort_meetings
   else
     puts 'No, can’t fit'
   end
