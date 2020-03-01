@@ -2,40 +2,33 @@
   require_relative 'Meeting'
   require_relative 'Scheduler'
 
-  $meetings = {
-    :m1 => Meeting.new("Meeting 1", 1.5, :onsite),
-    :m2 => Meeting.new('Meeting 2', 2, :offsite),
-    :m3 => Meeting.new('Meeting 3', 1, :onsite),
-    :m4 => Meeting.new('Meeting 4', 1, :offsite),
-    :m5 => Meeting.new('Meeting 5', 1, :offsite)
-  }
-
 class Planner
-  t = Scheduler.new
-  $hoursInDay = t.time_in_day
 
-  def schedule_my_meetings
-    case can_fit_all_meetings?
+  def schedule_meetings(set_of_meetings)
+    case can_fit_all_meetings?(set_of_meetings)
     when 0..8
-      puts sort_meetings
+      puts sort_meetings(set_of_meetings)
     else
       puts 'No, can’t fit'
     end
   end
 
-  def can_fit_all_meetings?
-    $meetings.each do |key,value|
+  def can_fit_all_meetings?(meetings)
+  t = Scheduler.new
+  hoursInDay = t.time_in_day
+
+    meetings.each do |key,value|
       case value.type
       when :offsite
         duration = value.duration + 0.5
       else
         duration = value.duration
       end
-      remainingHoursInDay = $hoursInDay - duration
-      $hoursInDay = remainingHoursInDay
+      remainingHoursInDay = hoursInDay - duration
+      hoursInDay = remainingHoursInDay
     end
 
-    return $hoursInDay
+    return hoursInDay
   end
 
   def set_timeslots(sorted_meetings)
@@ -53,11 +46,11 @@ class Planner
     return arr
   end
 
-  def sort_meetings
+  def sort_meetings(set_of_meetings)
     onsite = Hash.new
     offsite = Hash.new
 
-    $meetings.each do |key,value|
+    set_of_meetings.each do |key,value|
       meeting = value.name
       duration = value.duration
       type = value.type
@@ -74,5 +67,33 @@ class Planner
   end
 end
 
+set_of_meetings1 = {
+  :m1 => Meeting.new("Meeting 1", 1.5, :onsite),
+  :m2 => Meeting.new('Meeting 2', 2, :offsite),
+  :m3 => Meeting.new('Meeting 3', 1, :onsite),
+  :m4 => Meeting.new('Meeting 4', 1, :offsite),
+  :m5 => Meeting.new('Meeting 5', 1, :offsite)
+}
+
 test1 = Planner.new
-test1.schedule_my_meetings
+test1.schedule_meetings(set_of_meetings1)
+
+set_of_meetings2 = {
+  :m1 => Meeting.new("Meeting 1", 4, :offsite),
+  :m2 => Meeting.new('Meeting 2', 4, :offsite),
+}
+
+test2 = Planner.new
+test2.schedule_meetings(set_of_meetings2)
+
+set_of_meetings3 = {
+  :m1 => Meeting.new("Meeting 1", 3, :onsite),
+  :m2 => Meeting.new('Meeting 2', 2, :offsite),
+  :m3 => Meeting.new('Meeting 3', 1, :onsite),
+  :m4 => Meeting.new('Meeting 4', 0.5, :onsite)
+}
+
+test3 = Planner.new
+test3.schedule_meetings(set_of_meetings3)
+
+
