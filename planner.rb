@@ -1,15 +1,48 @@
-  require 'time'
-  require_relative 'Meeting'
-  require_relative 'Scheduler'
+require 'time'
+
+class Meeting
+  attr_accessor :name, :duration, :type
+  def initialize(name, duration, type)
+    @name = name
+    @duration = duration.to_f
+    @type = type.to_sym
+  end
+end
+
+class Scheduler
+  def self.schedulable_time
+      {starts_at: Time.parse("9:00"), ends_at: Time.parse("17:00")}
+  end
+
+  def time_in_day
+      start_time = Scheduler.schedulable_time[:starts_at]
+      end_time = Scheduler.schedulable_time[:ends_at]
+      work_hours = (end_time - start_time)/3600
+  end
+
+  def schedule(length, first_meeting, prev_end_time, type)
+     if first_meeting == 0
+        start_of_meeting = Scheduler.schedulable_time[:starts_at]
+      elsif type == :offsite
+        start_of_meeting = prev_end_time + 60*30
+      else 
+        start_of_meeting = prev_end_time
+      end
+
+      end_of_meeting = start_of_meeting + length*60*60
+
+      return scheduled_time = {:start_time => start_of_meeting, :end_time => end_of_meeting}
+  end
+end
 
 class Planner
-
   def schedule_meetings(set_of_meetings)
     case can_fit_all_meetings?(set_of_meetings)
     when 0..8
+      puts "Here is a recommended schedule for your meetings: "
       puts sort_meetings(set_of_meetings)
     else
-      puts 'No, can’t fit'
+      puts 'Sorry, all the meetings can’t fit into one work day'
     end
   end
 
@@ -39,7 +72,7 @@ class Planner
 
     sorted_meetings.each do |key,value|
       result = t1.schedule(value[:duration], first_meeting, prev_end_time, value[:type])
-      arr << "#{result[:start_time].strftime('%H:%M')} - #{result[:end_time].strftime('%H:%M')} - #{key}"
+      arr << "#{result[:start_time].strftime('%H:%M %p')} - #{result[:end_time].strftime('%H:%M %p')} - #{key}"
       first_meeting = first_meeting + 1
       prev_end_time = result[:end_time]
     end
@@ -67,33 +100,35 @@ class Planner
   end
 end
 
-set_of_meetings1 = {
-  :m1 => Meeting.new("Meeting 1", 1.5, :onsite),
-  :m2 => Meeting.new('Meeting 2', 2, :offsite),
-  :m3 => Meeting.new('Meeting 3', 1, :onsite),
-  :m4 => Meeting.new('Meeting 4', 1, :offsite),
-  :m5 => Meeting.new('Meeting 5', 1, :offsite)
-}
+def user_input
+  set_of_meetings = {}
+  input = ""
+  name = ""
+  duration = ""
+  type = ""
 
-test1 = Planner.new
-test1.schedule_meetings(set_of_meetings1)
+  puts "Do you have a meeting to add? Yes/No "
+  input = gets.chomp.downcase
 
-set_of_meetings2 = {
-  :m1 => Meeting.new("Meeting 1", 4, :offsite),
-  :m2 => Meeting.new('Meeting 2', 4, :offsite),
-}
+  while input == "yes" do 
+    print "What is the meetings name?: "
+    name = gets.chomp
+    print "How long is will the meeting be?: "
+    duration = gets.chomp
+    print "Is the location onsite or offsite?: "
+    type = gets.chomp
 
-test2 = Planner.new
-test2.schedule_meetings(set_of_meetings2)
+    set_of_meetings[name] = Meeting.new(name, duration, type)
 
-set_of_meetings3 = {
-  :m1 => Meeting.new("Meeting 1", 3, :onsite),
-  :m2 => Meeting.new('Meeting 2', 2, :offsite),
-  :m3 => Meeting.new('Meeting 3', 1, :onsite),
-  :m4 => Meeting.new('Meeting 4', 0.5, :onsite)
-}
+    print "Would you like to add another meeting? Yes/No: "
+    input = gets.chomp.downcase
+  end
+  if !set_of_meetings.empty?
+    user_input = Planner.new
+    user_input.schedule_meetings(set_of_meetings)
+  end
+end
 
-test3 = Planner.new
-test3.schedule_meetings(set_of_meetings3)
+user_input
 
 
