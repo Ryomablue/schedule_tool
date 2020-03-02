@@ -4,8 +4,8 @@ class Meeting
   attr_accessor :name, :duration, :type
   def initialize(name, duration, type)
     @name = name
-    @duration = duration.to_f
-    @type = type.to_sym
+    @duration = duration
+    @type = type
   end
 end
 
@@ -42,7 +42,7 @@ class Planner
       puts "Here is a recommended schedule for your meetings: "
       puts sort_meetings(set_of_meetings)
     else
-      puts 'Sorry, all the meetings can’t fit into one work day'
+      puts 'Sorry, the meeting(s) can’t fit into one work day'
     end
   end
 
@@ -72,7 +72,7 @@ class Planner
 
     sorted_meetings.each do |key,value|
       result = t1.schedule(value[:duration], first_meeting, prev_end_time, value[:type])
-      arr << "#{result[:start_time].strftime('%H:%M %p')} - #{result[:end_time].strftime('%H:%M %p')} - #{key}"
+      arr << "#{result[:start_time].strftime('%I:%M %p')} - #{result[:end_time].strftime('%I:%M %p')} - #{key}"
       first_meeting = first_meeting + 1
       prev_end_time = result[:end_time]
     end
@@ -89,7 +89,8 @@ class Planner
       type = value.type
       meet_details = {:duration => duration, :type => type}
 
-      if type == :onsite
+      case value.type
+      when :onsite
         onsite.store(meeting, meet_details)
       else
         offsite.store(meeting, meet_details)
@@ -113,10 +114,12 @@ def user_input
   while input == "yes" do 
     print "What is the meetings name?: "
     name = gets.chomp
+
     print "How long is will the meeting be?: "
-    duration = gets.chomp
-    print "Is the location onsite or offsite?: "
-    type = gets.chomp
+    duration = gets.to_f
+
+    print "Is the location onsite or offsite?: " 
+    type = gets.to_sym
 
     set_of_meetings[name] = Meeting.new(name, duration, type)
 
